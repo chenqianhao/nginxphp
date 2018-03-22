@@ -2,7 +2,7 @@ FROM centos:latest
 MAINTAINER chenqianhao 68527761@qq.com
 
 #root用户密码
-ENV ROOT_PASSWORD=Cqh15871209011
+#ENV ROOT_PASSWORD=123456789
 #php版本,因为php版本间配置文件模板不相同，此处的版本号只能为大于7.0以上版本
 ENV PHP_VER=7.1.13
 #nginx版本
@@ -20,11 +20,6 @@ ENV TZ=Asia/Shanghai
 #运行用户
 ENV USER=www
 ENV GROUP=www
-#新增用户
-ENV user=cqh
-ENV password=Cqh123456
-#ElasticSearch版本
-#ENV ES_VER=5.6.4
 
 #修改dns地址
 RUN echo nameserver 223.5.5.5 > /etc/resolv.conf
@@ -82,9 +77,6 @@ RUN cp php-fpm.conf.default php-fpm.conf \
     && cp /usr/local/php/bin/php /usr/sbin/ \
     && cp /usr/local/php/bin/phpize /usr/sbin/
 
-#WORKDIR /etc/nginx
-#RUN wget http://oxnd75eqj.bkt.clouddn.com/1515738108.zip \
-#    && unzip 1515738108.zip && rm -rf 1515738108.zip
 #安装nginx
 WORKDIR /usr/src
 RUN wget -O nginx.tar.gz http://nginx.org/download/nginx-${NGINX_VER}.tar.gz -O nginx.tar.gz && mkdir nginx && tar -zxvf nginx.tar.gz -C ./nginx --strip-components 1
@@ -142,34 +134,7 @@ RUN make \
          esac" > /etc/init.d/redis \
     && chmod +x /etc/init.d/redis
 
-#安装memcached server
 WORKDIR /usr/src
-# 安装libevent
-#RUN wget -O https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz   && mkdir libevent && tar -xzvf libevent.tar.gz -C ./libevent --strip-components 1
-RUN wget http://oxnd75eqj.bkt.clouddn.com/1515060858.zip && unzip 1515060858.zip
-WORKDIR /usr/src/libevent
-RUN ./configure --prefix=/usr/local/libevent && make && make install
-WORKDIR /usr/src
-RUN wget -O memcached.tar.gz http://www.memcached.org/files/memcached-${MEMCACHED_VER}.tar.gz && mkdir memcached && tar -xzvf memcached.tar.gz -C ./memcached --strip-components 1
-WORKDIR /usr/src/memcached
-RUN ./configure --prefix=/usr/memcached --with-libevent=/usr/local/libevent/ \
-    && make && make install && cp /usr/memcached/bin/memcached /usr/sbin/
-# memcached -d -m 40 -l localhost -u root -p 11211 -P /tmp/memcached.pid
-
-# 安装 libmemcached
-WORKDIR /usr/src
-RUN wget -O libmemcached.tar.gz https://launchpadlibrarian.net/165454254/libmemcached-1.0.18.tar.gz && mkdir libmemcached && tar -xzvf libmemcached.tar.gz -C ./libmemcached --strip-components 1
-WORKDIR /usr/src/libmemcached
-RUN ./configure --prefix=/usr/local/libmemcached && make && make install
-WORKDIR /usr/src
-# 安装php扩展
-RUN wget -O memcached-3.0.4.tgz http://pecl.php.net/get/memcached-3.0.4.tgz && mkdir memcached-3.0.4 && tar -xzvf memcached-3.0.4.tgz -C ./memcached-3.0.4 --strip-components 1
-WORKDIR /usr/src/memcached-3.0.4
-RUN /usr/local/php/bin/phpize   \
-    && ./configure  --with-libmemcached-dir=/usr/local/libmemcached --with-php-config=/usr/local/php/bin/php-config --disable-memcached-sasl \
-    && make && make install \
-    && echo '[memcached]' >> /etc/php/php.ini &&  echo "extension=memcached.so" >> /etc/php/php.ini
-
 #安装php redis、swoole、mongodb扩展
 RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
     && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
@@ -239,10 +204,7 @@ RUN  source /etc/profile \
     \
     && echo [program:crond] >> /etc/supervisord.conf \
     && echo startsecs=3 >> /etc/supervisord.conf \ 
-    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf \
-    \
-    && echo [program:memcached] >> /etc/supervisord.conf \
-    && echo command=/etc/init.d/memcached start >> /etc/supervisord.conf
+    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
 RUN source /etc/profile
 RUN chown -R www:www /www/
