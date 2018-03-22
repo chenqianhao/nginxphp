@@ -16,7 +16,7 @@ wget -qO- https://get.docker.com/ | sh
 2. 获取容器
 
 ```
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/cqh/nginxphp:1.0.0
+sudo docker pull docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
 ```
 3. 获取配置文件
 
@@ -28,16 +28,16 @@ git clone git@github.com:chenqianhao/nginxphp.git
 
 4. 运行容器
 
-- linux
+- linux|mac
 ```
 # 进入上面的配置文件夹 -v $PWD/cron.d:/etc/cron.d -v $PWD/data/log:/var/log
-sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 1314:22 -p 11211:11211 -p 6379:6379 --name nginxphp -itd -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www  registry.cn-hangzhou.aliyuncs.com/cqh/nginxphp:1.0.0
+sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 1314:22 -p 11211:11211 -p 6379:6379 --name nginxphp -itd -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
 
 ```
 -  windows  -v E:/docker/lnmp/data/log:/var/log
 ```
 mkdir  E:/docker/www  #新建网站目录
-docker run -h cqhlnmp -p 80:80 -p 1314:22 -p 11211:11211 -p 6379:6379 --name nginxphp -itd -v E:/docker/lnmp/vhosts:/etc/nginx/sites.d -v E:/docker/www:/www registry.cn-hangzhou.aliyuncs.com/cqh/nginxphp:1.0.0
+docker run -h cqhlnmp -p 80:80 -p 1314:22 -p 11211:11211 -p 6379:6379 --name nginxphp -itd -v E:/docker/lnmp/vhosts:/etc/nginx/sites.d -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
 ```
 
 5.xhprof使用方法
