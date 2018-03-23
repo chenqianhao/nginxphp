@@ -44,8 +44,16 @@ ENV LC_ALL zh_CN.utf8
 #安装supervisor
 RUN  yum install python-setuptools -y && easy_install supervisor
 
-#安装openssh server，设置root密码为变量ROOT_PASSWORD
+#安装openssh server
 RUN yum install openssh-server -y
+RUN echo PermitRootLogin  yes >> /etc/ssh/sshd_config\
+    && echo PasswordAuthentication yes >> /etc/ssh/sshd_config\
+    && echo RSAAuthentication yes >> etc/ssh/sshd_config\
+    && sed -i "s/UseDNS yes/UseDNS no/" /etc/ssh/sshd_config\
+    && echo "root:$ROOT_PASSWORD" | chpasswd\
+    && ssh-keygen -t dsa -f /etc/ssh/ssh_host_rsa_key\
+    && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key\
+    && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key
 
 # shell脚本
 WORKDIR /opt
@@ -135,7 +143,12 @@ RUN make \
     && chmod +x /etc/init.d/redis
 
 WORKDIR /usr/src
-#安装php redis、swoole、mongodb扩展
+#按照swoole
+RUN git clone https://github.com/swoole/swoole-src.git && cd swoole-src \
+phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j \
+sudo make install
+
+#安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
     && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
     \
