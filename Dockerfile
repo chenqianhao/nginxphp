@@ -55,16 +55,6 @@ RUN echo PermitRootLogin  yes >> /etc/ssh/sshd_config\
     && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key\
     && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key
 
-# shell脚本
-WORKDIR /opt
-RUN wget http://oxnd75eqj.bkt.clouddn.com/1515736535.zip \
-  && unzip 1515736535.zip && mv shell/* ./ && rm -rf shell 1515736535.zip \
-  && chmod +x *
-
-# memcache启动脚本
-ADD http://oxnd75eqj.bkt.clouddn.com/1515736766./home/cqh/git/nginxphp/memcached /etc/init.d/
-RUN chmod +x /etc/init.d/memcached
-
 #安装php
 RUN yum install epel-release -y && yum update -y \
     && yum -y install cronie pcre pcre-devel zlib zlib-devel openssl openssl-devel libxml2 libxml2-devel libjpeg libjpeg-devel libpng libpng-devel curl curl-devel libicu libicu-devel libmcrypt  libmcrypt-devel freetype freetype-devel libmcrypt libmcrypt-devel autoconf gcc-c++
@@ -145,8 +135,8 @@ RUN make \
 WORKDIR /usr/src
 #按照swoole
 RUN git clone https://github.com/swoole/swoole-src.git && cd swoole-src \
-phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j \
-sudo make install
+&& phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j \
+&& make install
 
 #安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
@@ -158,8 +148,8 @@ WORKDIR /www
 
 #安装必要的服务
 RUN yum install vixie-cron crontabs -y \
-     && cd /usr/src && /usr/local/php/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && /usr/local/php/bin/php composer-setup.php  --install-dir=/usr/local/bin --filename=composer && rm -rf composer-setup.php && cp /usr/local/bin/composer /usr/sbin/
-
+     && cd /usr/src && /usr/local/php/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && /usr/local/php/bin/php composer-setup.php  --install-dir=/usr/local/bin --filename=composer && rm -rf composer-setup.php && cp /usr/local/bin/composer /usr/sbin/  \
+     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
 WORKDIR /var/tools
 RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php  \
@@ -168,8 +158,6 @@ RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.
   && source ~/.bash_profile \
   && nvm install $NODE_VER && npm install -g cnpm --registry=https://registry.npm.taobao.org \
   && cnpm install --global gulp
-#安装yarn
-RUN wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo && yum install yarn -y
 
 #定时任务
 RUN \
