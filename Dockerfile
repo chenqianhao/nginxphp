@@ -132,12 +132,14 @@ RUN make \
          esac" > /etc/init.d/redis \
     && chmod +x /etc/init.d/redis
 
-WORKDIR /usr/src
+
+WORKDIR /var/tools
 #按照swoole
 RUN git clone https://github.com/swoole/swoole-src.git && cd swoole-src \
-&& phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j \
-&& make install
+&& phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j
+RUN make install
 
+WORKDIR /usr/src
 #安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
     && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
@@ -150,40 +152,6 @@ WORKDIR /www
 RUN yum install vixie-cron crontabs -y \
      && cd /usr/src && /usr/local/php/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && /usr/local/php/bin/php composer-setup.php  --install-dir=/usr/local/bin --filename=composer && rm -rf composer-setup.php && cp /usr/local/bin/composer /usr/sbin/  \
      && composer config -g repo.packagist composer https://packagist.phpcomposer.com
-
-WORKDIR /var/tools
-RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php  \
-  && cd /var/tools \
-  && wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash \
-  && source ~/.bash_profile \
-  && nvm install $NODE_VER && npm install -g cnpm --registry=https://registry.npm.taobao.org \
-  && cnpm install --global gulp
-
-#定时任务
-RUN \
-  cd /etc/cron.d  \
-  && wget http://oxnd75eqj.bkt.clouddn.com/1515738502.zip \
-  && unzip 1515738502.zip && rm -rf 1515738502.zip
-
-WORKDIR /www
-# 安装phpxhprof扩展
-RUN git clone https://github.com/longxinH/xhprof.git && cd xhprof/extension/  \
-    && phpize   \
-    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-xhprof \
-    && make && make install \
-    && mkdir -p -m 777 /tmp/xhprof \
-    && echo -e "[xhprof]\nextension = xhprof.so\nxhprof.output_dir = /tmp/xhprof" >> /etc/php/php.ini \
-    && cd /www/xhprof \
-#    && mkdir /var/tools && mv xhprof_html /var/tools/ \
-    && mv xhprof_html /var/tools/ \
-    && mv xhprof_lib /usr/local/php/lib/php \
-    && sed -i "s/dirname(__FILE__) . '\/..\/xhprof_lib'/'xhprof_lib'/" /var/tools/xhprof_html/index.php \
-    && sed -i "s/dirname(__FILE__) . '\/..\/xhprof_lib'/'xhprof_lib'/" /var/tools/xhprof_html/callgraph.php \
-    && sed -i "s/dirname(__FILE__) . '\/..\/xhprof_lib'/'xhprof_lib'/" /var/tools/xhprof_html/typeahead.php \
-    && rm -rf /www/xhprof
-
-
-WORKDIR /www
 
 #配置supervisor
 RUN  source /etc/profile \
@@ -204,7 +172,6 @@ RUN  source /etc/profile \
     && echo command=/usr/local/redis/bin/redis-server /etc/redis.conf >> /etc/supervisord.conf \
     \
     && echo [program:crond] >> /etc/supervisord.conf \
-    && echo startsecs=3 >> /etc/supervisord.conf \ 
     && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
 RUN source /etc/profile
