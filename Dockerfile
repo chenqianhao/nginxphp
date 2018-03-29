@@ -95,32 +95,8 @@ RUN \
      && unzip 1515839080.zip && rm -rf 1515839080.zip \
      && cd /etc/nginx/ && mkdir rewrite && cd rewrite && touch test.conf
 
-#安装redis server
-WORKDIR /usr/src
-RUN wget -O redis.tar.gz http://download.redis.io/releases/redis-${REDIS_VER}.tar.gz && mkdir redis && tar -xzvf redis.tar.gz -C ./redis --strip-components 1
-WORKDIR /usr/src/redis
-RUN make \
-    && make install \
-    && mkdir -p /usr/local/redis/bin \
-    && cp ./src/redis-server /usr/local/redis/bin/ \
-    && cp ./src/redis-cli /usr/local/redis/bin/ \
-    && cp ./src/redis-benchmark /usr/local/redis/bin/ \
-    && cp ./redis.conf /etc/redis.conf \
-    && sed -i 's/bind 127.0.0.1/bind 0.0.0.0/' /etc/redis.conf \
-    && sed -i "s/# requirepass foobared/requirepass ${REDIS_PASS}/" /etc/redis.conf \
-    && echo -e "# description: Redis server. \n\
-         case \$1 in \n\
-            restart): \n\
-                /usr/local/redis/bin/redis-cli -h 127.0.0.1 -p 6379 -a ${REDIS_PASS} shutdown \n\
-                /usr/local/redis/bin/redis-server /etc/redis.conf \n\
-                ;; \n\
-            stop): \n\
-                /usr/local/redis/bin/redis-cli -h 127.0.0.1 -p 6379 -a ${REDIS_PASS} shutdown \n\
-                ;; \n\
-            *): \n\
-                /usr/local/redis/bin/redis-server /etc/redis.conf \n\
-         esac" > /etc/init.d/redis \
-    && chmod +x /etc/init.d/redis
+
+
 
 
 WORKDIR /usr/src
@@ -129,11 +105,11 @@ RUN wget -O swoole_src.zip https://github.com/swoole/swoole-src/archive/master.z
     && cd swoole-src-master && /usr/local/php/bin/phpize && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
     && make clean && make -j && make install
 
-WORKDIR /usr/src
+#WORKDIR /usr/src
 #安装php redis、mongodb扩展
-RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
-   && /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+#RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+#   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
+#   && /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
 WORKDIR /www
 
@@ -157,9 +133,9 @@ RUN  source /etc/profile \
     && echo [program:php-fpm] >> /etc/supervisord.conf \
     && echo command=/etc/init.d/php-fpm start >> /etc/supervisord.conf \
     \
-    && echo [program:redis] >> /etc/supervisord.conf \
-    && echo command=/usr/local/redis/bin/redis-server /etc/redis.conf >> /etc/supervisord.conf \
-    \
+#    && echo [program:redis] >> /etc/supervisord.conf \
+#    && echo command=/usr/local/redis/bin/redis-server /etc/redis.conf >> /etc/supervisord.conf \
+#    \
     && echo [program:crond] >> /etc/supervisord.conf \
     && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
