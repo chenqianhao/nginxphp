@@ -44,9 +44,6 @@ RUN  yum install python-setuptools -y && easy_install supervisor
 
 #安装openssh server
 RUN yum install openssh-server -y
-RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_rsa_key\
-    && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key\
-    && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key
 
 #安装php
 RUN yum install epel-release -y && yum update -y \
@@ -126,18 +123,17 @@ RUN make \
     && chmod +x /etc/init.d/redis
 
 
-WORKDIR /var/tools
-#按照swoole
-RUN git clone git@github.com:swoole/swoole-src.git
-# && cd swoole-src
-# && phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j
-# RUN make install
+WORKDIR /usr/src
+#安装swoole
+RUN wget -O swoole_src.zip https://github.com/swoole/swoole-src/archive/master.zip && unzip swoole_src.zip \
+    && cd swoole-src-master && /usr/local/php/bin/phpize && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
+    && make clean && make -j && make install
 
 WORKDIR /usr/src
 #安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-#    && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
-    && /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
+   && /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
 WORKDIR /www
 
