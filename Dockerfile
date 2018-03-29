@@ -1,18 +1,14 @@
 FROM centos:latest
 MAINTAINER chenqianhao 68527761@qq.com
 
-#root用户密码
-#ENV ROOT_PASSWORD=123456789
 #php版本,因为php版本间配置文件模板不相同，此处的版本号只能为大于7.0以上版本
-ENV PHP_VER=7.2.4
+ENV PHP_VER=7.1.13
 #nginx版本
 ENV NGINX_VER=1.13.8
 #redis版本
 ENV REDIS_VER=3.2.11
 #redis密码
 ENV REDIS_PASS=CQH123456789
-#memcached版本
-ENV MEMCACHED_VER=1.5.3
 #时区
 ENV TZ=Asia/Shanghai
 #运行用户
@@ -27,7 +23,7 @@ RUN mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backu
 
 
 #安装基础工具
-RUN yum install vim wget git net-tools ansible zip unzip sudo -y
+RUN yum install vim wget git net-tools ansible zip unzip libmemcached sudo -y
 
 #时区
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && yum install ntp -y && ntpdate pool.ntp.org
@@ -42,7 +38,7 @@ ENV LC_ALL zh_CN.utf8
 #安装supervisor
 RUN  yum install python-setuptools -y && easy_install supervisor
 
-#安装openssh server
+#安装openssh server，设置root密码为变量ROOT_PASSWORD
 RUN yum install openssh-server -y
 
 #安装php
@@ -65,6 +61,9 @@ RUN cp php-fpm.conf.default php-fpm.conf \
     && cp /usr/local/php/bin/php /usr/sbin/ \
     && cp /usr/local/php/bin/phpize /usr/sbin/
 
+#WORKDIR /etc/nginx
+#RUN wget http://oxnd75eqj.bkt.clouddn.com/1515738108.zip \
+#    && unzip 1515738108.zip && rm -rf 1515738108.zip
 #安装nginx
 WORKDIR /usr/src
 RUN wget -O nginx.tar.gz http://nginx.org/download/nginx-${NGINX_VER}.tar.gz -O nginx.tar.gz && mkdir nginx && tar -zxvf nginx.tar.gz -C ./nginx --strip-components 1
@@ -95,31 +94,67 @@ RUN \
      && unzip 1515839080.zip && rm -rf 1515839080.zip \
      && cd /etc/nginx/ && mkdir rewrite && cd rewrite && touch test.conf
 
-
-
-
-
+#安装redis server
 WORKDIR /usr/src
-#安装swoole
-RUN wget -O swoole_src.zip https://github.com/swoole/swoole-src/archive/master.zip && unzip swoole_src.zip \
-    && cd swoole-src-master && /usr/local/php/bin/phpize && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
-    && make clean && make -j && make install
+RUN wget -O redis.tar.gz http://download.redis.io/releases/redis-${REDIS_VER}.tar.gz && mkdir redis && tar -xzvf redis.tar.gz -C ./redis --strip-components 1
+WORKDIR /usr/src/redis
+RUN make \
+    && make install \
+    && mkdir -p /usr/local/redis/bin \
+    && cp ./src/redis-server /usr/local/redis/bin/ \
+    && cp ./src/redis-cli /usr/local/redis/bin/ \
+    && cp ./src/redis-benchmark /usr/local/redis/bin/ \
+    && cp ./redis.conf /etc/redis.conf \
+    && sed -i 's/bind 127.0.0.1/bind 0.0.0.0/' /etc/redis.conf \
+    && sed -i "s/# requirepass foobared/requirepass ${REDIS_PASS}/" /etc/redis.conf \
+    && echo -e "# description: Redis server. \n\
+         case \$1 in \n\
+            restart): \n\
+                /usr/local/redis/bin/redis-cli -h 127.0.0.1 -p 6379 -a ${REDIS_PASS} shutdown \n\
+                /usr/local/redis/bin/redis-server /etc/redis.conf \n\
+                ;; \n\
+            stop): \n\
+                /usr/local/redis/bin/redis-cli -h 127.0.0.1 -p 6379 -a ${REDIS_PASS} shutdown \n\
+                ;; \n\
+            *): \n\
+                /usr/local/redis/bin/redis-server /etc/redis.conf \n\
+         esac" > /etc/init.d/redis \
+    && chmod +x /etc/init.d/redis
 
-#WORKDIR /usr/src
-#安装php redis、mongodb扩展
-#RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+#安装php redis、swoole、mongodb扩展
+#echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
 #   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
-#   && /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+#    \
+RUN  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
 WORKDIR /www
 
 #安装必要的服务
 RUN yum install vixie-cron crontabs -y \
-     && cd /usr/src && /usr/local/php/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && /usr/local/php/bin/php composer-setup.php  --install-dir=/usr/local/bin --filename=composer && rm -rf composer-setup.php && cp /usr/local/bin/composer /usr/sbin/  \
-     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
+     && cd /usr/src && /usr/local/php/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+     && /usr/local/php/bin/php composer-setup.php  --install-dir=/usr/local/bin --filename=composer \
+     && rm -rf composer-setup.php && cp /usr/local/bin/composer /usr/sbin/ \
+     composer config -g repo.packagist composer https://packagist.phpcomposer.com
+
+
+WORKDIR /var/tools
+RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php  \
+  && cd /var/tools \
+  && wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash \
+  && source ~/.bash_profile \
+  && nvm install $NODE_VER && npm install -g cnpm --registry=https://registry.npm.taobao.org \
+  && cnpm install --global gulp
+
+
+WORKDIR /www
 
 #配置supervisor
 RUN  source /etc/profile \
+    \
+   && echo [inet_http_server] > /etc/supervisord.conf \
+   && echo port=*:9001 >> /etc/supervisord.conf \
+   && echo username="chenqianhao" >> /etc/supervisord.conf \
+   && echo password="Cqh15871209011" >> /etc/supervisord.conf \
    \
     && echo [supervisord] >> /etc/supervisord.conf \
     && echo nodaemon=true >> /etc/supervisord.conf \
@@ -133,17 +168,21 @@ RUN  source /etc/profile \
     && echo [program:php-fpm] >> /etc/supervisord.conf \
     && echo command=/etc/init.d/php-fpm start >> /etc/supervisord.conf \
     \
-#    && echo [program:redis] >> /etc/supervisord.conf \
-#    && echo command=/usr/local/redis/bin/redis-server /etc/redis.conf >> /etc/supervisord.conf \
-#    \
+    && echo [program:redis] >> /etc/supervisord.conf \
+    && echo command=/usr/local/redis/bin/redis-server /etc/redis.conf >> /etc/supervisord.conf \
+    \
     && echo [program:crond] >> /etc/supervisord.conf \
-    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
+    && echo startsecs=3 >> /etc/supervisord.conf \ 
+    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf \
+    \
+    && echo [program:memcached] >> /etc/supervisord.conf \
+    && echo command=/etc/init.d/memcached start >> /etc/supervisord.conf
 
 RUN source /etc/profile
 RUN chown -R www:www /www/
 
 
-EXPOSE 22 80 11211 6379
+EXPOSE 22 80 9091 8081 8083 9999 6379
 
 
 CMD ["/usr/bin/supervisord"]
