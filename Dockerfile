@@ -13,8 +13,6 @@ ENV REDIS_VER=3.2.11
 ENV REDIS_PASS=CQH123456789
 #memcached版本
 ENV MEMCACHED_VER=1.5.3
-#node版本
-ENV NODE_VER=v9.0.0
 #时区
 ENV TZ=Asia/Shanghai
 #运行用户
@@ -29,7 +27,7 @@ RUN mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backu
 
 
 #安装基础工具
-RUN yum install vim wget git net-tools ansible zip unzip libmemcached sudo -y
+RUN yum install vim wget git net-tools ansible zip unzip sudo -y
 
 #时区
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && yum install ntp -y && ntpdate pool.ntp.org
@@ -46,12 +44,7 @@ RUN  yum install python-setuptools -y && easy_install supervisor
 
 #安装openssh server
 RUN yum install openssh-server -y
-RUN echo PermitRootLogin  yes >> /etc/ssh/sshd_config\
-    && echo PasswordAuthentication yes >> /etc/ssh/sshd_config\
-    && echo RSAAuthentication yes >> etc/ssh/sshd_config\
-    && sed -i "s/UseDNS yes/UseDNS no/" /etc/ssh/sshd_config\
-    && echo "root:$ROOT_PASSWORD" | chpasswd\
-    && ssh-keygen -t dsa -f /etc/ssh/ssh_host_rsa_key\
+RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_rsa_key\
     && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key\
     && ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key
 
@@ -135,7 +128,8 @@ RUN make \
 
 WORKDIR /var/tools
 #按照swoole
-RUN git clone https://github.com/swoole/swoole-src.git && cd swoole-src \
+RUN git clone git@github.com:swoole/swoole-src.git
+# && cd swoole-src
 # && phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j
 # RUN make install
 
