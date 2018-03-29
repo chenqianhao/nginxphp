@@ -136,14 +136,13 @@ RUN make \
 WORKDIR /var/tools
 #按照swoole
 RUN git clone https://github.com/swoole/swoole-src.git && cd swoole-src \
-&& phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j
-RUN make install
+# && phpize && ./configure --enable-async-redis  --enable-openssl && make clean && make -j
+# RUN make install
 
 WORKDIR /usr/src
 #安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install redis && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-    && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
-    \
+#    && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
     && /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
 WORKDIR /www
