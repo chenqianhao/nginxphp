@@ -143,9 +143,9 @@ RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzi
     
 
 #安装php redis、swoole、mongodb扩展
-RUN /usr/local/php/bin/pecl install swoole && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
-echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
+RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
+&& echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+   && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
     \
    &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
