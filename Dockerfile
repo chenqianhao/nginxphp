@@ -137,7 +137,7 @@ RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.
 
 # 安装swoole
 RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip v${SWOOLE_VER}.zip \
-    && cd v${SWOOLE_VER} && phpize \
+    && cd swoole-src-${SWOOLE_VER} && phpize \
     && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
 
 #安装必要的服务
