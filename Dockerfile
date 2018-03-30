@@ -9,6 +9,8 @@ ENV NGINX_VER=1.13.8
 ENV REDIS_VER=3.2.11
 #hredis版本
 ENV HREDIS_VER=0.13.3
+#swoole版本
+ENV SWOOLE_VER=1.9.23
 #redis密码
 ENV REDIS_PASS=CQH123456789
 #时区
@@ -134,8 +136,8 @@ RUN /usr/local/php/bin/inotify install inotify && echo '[inotify]' >> /etc/php/p
     &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
 # 安装swoole
-RUN wget -O swoole-src-master.zip https://github.com/swoole/swoole-src/archive/master.zip && unzip swoole-src-master.zip \
-    && cd swoole-src-master && phpize \
+RUN wgethttps://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip swoole-src-master.zip \
+    && cd v${SWOOLE_VER} && phpize \
     && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
     && make clean && make -j && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
     
