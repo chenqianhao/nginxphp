@@ -154,11 +154,6 @@ RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.
 
 #配置supervisor
 RUN  source /etc/profile \
-    \
-   && echo [inet_http_server] > /etc/supervisord.conf \
-   && echo port=*:9001 >> /etc/supervisord.conf \
-   && echo username="chenqianhao" >> /etc/supervisord.conf \
-   && echo password="Cqh15871209011" >> /etc/supervisord.conf \
    \
     && echo [supervisord] >> /etc/supervisord.conf \
     && echo nodaemon=true >> /etc/supervisord.conf \
@@ -177,13 +172,9 @@ RUN  source /etc/profile \
     \
     && echo [program:crond] >> /etc/supervisord.conf \
     && echo startsecs=3 >> /etc/supervisord.conf \ 
-    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf \
-    \
-    && echo [program:memcached] >> /etc/supervisord.conf \
-    && echo command=/etc/init.d/memcached start >> /etc/supervisord.conf
+    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
 WORKDIR /www
-RUN source /etc/profile
 RUN chown -R www:www /www
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
