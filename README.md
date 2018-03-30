@@ -30,13 +30,13 @@ git clone git@github.com:chenqianhao/nginxphp.git
 
 - linux|mac
 ```
-# 进入上面的配置文件夹 -v $PWD/cron.d:/etc/cron.d -v $PWD/data/log:/var/log
-sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 1314:22 -p 11211:11211 -p 6379:6379 --name nginxphp -itd -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
+# 进入上面的配置文件夹 
+sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd2
 
 ```
--  windows  -v E:/docker/lnmp/data/log:/var/log
+-  windows
 ```
 mkdir  E:/docker/www  #新建网站目录
-docker run -h cqhlnmp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd -v E:/docker/lnmp/vhosts:/etc/nginx/sites.d -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd2
+docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd -v E:/docker/nginxphp/sites.d:/etc/nginx/sites.d E:/docker/nginxphp/rewrite:/etc/nginx/rewrite -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd2
 ```
 
