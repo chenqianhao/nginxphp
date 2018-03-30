@@ -16,7 +16,7 @@ wget -qO- https://get.docker.com/ | sh
 2. 获取容器
 
 ```
-sudo docker pull docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
+sudo docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
 ```
 3. 获取配置文件
 
@@ -30,29 +30,12 @@ git clone git@github.com:chenqianhao/nginxphp.git
 
 - linux|mac
 ```
-# 进入上面的配置文件夹 -v $PWD/cron.d:/etc/cron.d -v $PWD/data/log:/var/log
-sudo docker run -h nginxphpsd -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphpsd -itd -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
+# 进入上面的配置文件夹 
+sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
 
 ```
--  windows  -v E:/docker/lnmp/data/log:/var/log
+-  windows  
 ```
-mkdir  E:/docker/www  #新建网站目录
-docker run -h cqhlnmp -p 80:80 -p 1314:22 -p 11211:11211 -p 6379:6379 --name nginxphp -itd -v E:/docker/lnmp/vhosts:/etc/nginx/sites.d -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
+#mkdir  E:/docker/www  #新建网站目录
+docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd -v E:/docker/nginxphp/sites.d:/etc/nginx/sites.d E:/docker/nginxphp/rewrite:/etc/nginx/rewrite -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
 ```
-
-5.xhprof使用方法
-```
-    xhprof_enable();
-
-    //你需要分析的代码
-
-    $xhprof_data = xhprof_disable();
-    include_once 'xhprof_lib/utils/xhprof_lib.php';//注xhprof_lib已经在/usr/local/php/lib/php中了
-    include_once 'xhprof_lib/utils/xhprof_runs.php';
-
-    $xhprof_runs = new XHProfRuns_Default();
-    $run_id = $xhprof_runs->save_run($xhprof_data, "xhprof_test");
-    //将run_id保存起来或者随代码一起输出
-
-```
-＊ 然后访问:http://nginx默认站点或域名/xhpfrof_html/index.php?run=run_id&source=xhprof_test查看结果。
