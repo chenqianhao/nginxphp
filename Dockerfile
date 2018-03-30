@@ -141,7 +141,8 @@ RUN wget -O swoole-src-master.zip https://github.com/swoole/swoole-src/archive/m
     
 
 #安装php redis、swoole、mongodb扩展
-RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
+#RUN /usr/local/php/bin/pecl install inotify && 
+RUN echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
 && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
    && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
     \
