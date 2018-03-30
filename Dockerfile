@@ -139,16 +139,6 @@ RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.
 RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip v${SWOOLE_VER}.zip \
     && cd v${SWOOLE_VER} && phpize \
     && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
-    && make clean && make -j && make install && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
-    
-
-#安装php redis、swoole、mongodb扩展
-RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
-&& echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-   && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
-    \
-   &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
-
 
 #安装必要的服务
 RUN yum install vixie-cron crontabs -y \
