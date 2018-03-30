@@ -136,7 +136,7 @@ RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.
     &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
 # 安装swoole
-RUN wgethttps://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip swoole-src-master.zip \
+RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip swoole-src-master.zip \
     && cd v${SWOOLE_VER} && phpize \
     && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
     && make clean && make -j && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
