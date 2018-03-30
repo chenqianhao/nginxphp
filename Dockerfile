@@ -139,7 +139,6 @@ RUN yum install vixie-cron crontabs -y \
 
 WORKDIR /var/tools
 RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php
-  && cnpm install --global gulp
 
 
 WORKDIR /www
