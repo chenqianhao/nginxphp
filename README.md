@@ -1,4 +1,4 @@
-# nginxphp
+# nginxphp swoole1.9
 
 
 NGING+PHP+REDIS Dockerfile
