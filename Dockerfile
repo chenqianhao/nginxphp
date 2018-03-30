@@ -7,6 +7,8 @@ ENV PHP_VER=7.1.13
 ENV NGINX_VER=1.13.8
 #redis版本
 ENV REDIS_VER=3.2.11
+#hredis版本
+ENV HREDIS_VER=0.13.3
 #redis密码
 ENV REDIS_PASS=CQH123456789
 #时区
@@ -120,14 +122,31 @@ RUN make \
                 /usr/local/redis/bin/redis-server /etc/redis.conf \n\
          esac" > /etc/init.d/redis \
     && chmod +x /etc/init.d/redis
+    
+WORKDIR /usr/src    
+# 安装hredis
+RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
+    && make -j && make install && ldconfig
 
 #安装php redis、swoole、mongodb扩展
-#echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-#   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
-#    \
-RUN  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+RUN /usr/local/php/bin/inotify install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
+    && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+    &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
 
-WORKDIR /www
+# 安装swoole
+RUN wget -O swoole-src-master.zip https://github.com/swoole/swoole-src/archive/master.zip && unzip swoole-src-master.zip \
+    && cd swoole-src-master && phpize \
+    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
+    && make clean && make -j && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
+    
+
+#安装php redis、swoole、mongodb扩展
+RUN /usr/local/php/bin/inotify install swoole && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
+echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+   && /usr/local/php/bin/pecl install swoole && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini \
+    \
+   &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+
 
 #安装必要的服务
 RUN yum install vixie-cron crontabs -y \
@@ -139,9 +158,6 @@ RUN yum install vixie-cron crontabs -y \
 
 WORKDIR /var/tools
 RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php
-
-
-WORKDIR /www
 
 #配置supervisor
 RUN  source /etc/profile \
@@ -176,6 +192,7 @@ RUN  source /etc/profile \
 RUN source /etc/profile
 RUN chown -R www:www /www/
 
+WORKDIR /www
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
 
