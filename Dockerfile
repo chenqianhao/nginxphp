@@ -190,10 +190,10 @@ RUN  source /etc/profile \
     && echo [program:memcached] >> /etc/supervisord.conf \
     && echo command=/etc/init.d/memcached start >> /etc/supervisord.conf
 
-RUN source /etc/profile
-RUN chown -R www:www /www/
-
 WORKDIR /www
+
+RUN source /etc/profile
+RUN chown -R www:www /www
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
 
