@@ -180,14 +180,11 @@ RUN  source /etc/profile \
     \
     && echo [program:crond] >> /etc/supervisord.conf \
     && echo startsecs=3 >> /etc/supervisord.conf \ 
-    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf \
-    \
-    && echo [program:memcached] >> /etc/supervisord.conf \
-    && echo command=/etc/init.d/memcached start >> /etc/supervisord.conf
+    && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
 WORKDIR /www
 
-RUN chown -R www:www /www
+#RUN chown -R www:www /www
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
 
