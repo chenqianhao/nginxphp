@@ -130,7 +130,7 @@ WORKDIR /usr/src
 RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
     && make -j && make install && ldconfig
 
-#安装php redis、swoole、mongodb扩展
+#安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
     && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
     &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
