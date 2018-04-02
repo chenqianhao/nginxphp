@@ -134,7 +134,8 @@ RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.
 
 # 安装hredis
 RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
-    && make -j && make install && ldconfig
+    && make -j && make install && touch /etc/ld.so.conf.d/libc.conf \
+    && echo '/usr/local/lib' >> /etc/ld.so.conf.d/libc.conf &&  ldconfig
 
 # 安装swoole
 RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip \ 
