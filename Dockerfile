@@ -27,7 +27,7 @@ RUN mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backu
 
 
 #安装基础工具
-RUN yum install vim wget git net-tools ansible zip unzip libmemcached sudo -y
+RUN yum install vim wget git net-tools ansible zip unzip libmemcached sudo pcre-devel -y
 
 #时区
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && yum install ntp -y && ntpdate pool.ntp.org
@@ -138,7 +138,7 @@ RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.
 # 安装swoole
 RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip v${SWOOLE_VER}.zip \
     && cd swoole-src-${SWOOLE_VER} && phpize \
-    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
+    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis=/usr/local  --enable-openssl \
     && make clean && make -j && make install && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
 
 #安装必要的服务
