@@ -126,19 +126,20 @@ RUN make \
     && chmod +x /etc/init.d/redis
     
 WORKDIR /usr/src    
-# 安装hredis
-RUN /usr/local/php/bin/pecl install redis && wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
-    && make -j && make install && ldconfig
 
 #安装php redis、swoole、mongodb扩展
 RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
-    && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+    && /usr/local/php/bin/pecl install redis &&  echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
     &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+
+# 安装hredis
+RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
+    && make -j && make install && ldconfig
 
 # 安装swoole
 RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip \ 
 && unzip v${SWOOLE_VER}.zip && cd swoole-src-${SWOOLE_VER} \
-&& phpize && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis=/usr/local  --enable-openssl \
+&& phpize && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
 && make clean && make -j && make install && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
 
 
@@ -152,6 +153,9 @@ RUN yum install vixie-cron crontabs -y \
 
 WORKDIR /var/tools
 RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php
+
+WORKDIR /www
+#RUN chown -R www:www /www
 
 #配置supervisor
 RUN  source /etc/profile \
@@ -178,9 +182,5 @@ RUN  source /etc/profile \
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
 
-
 CMD ["/usr/bin/supervisord"]
 
-WORKDIR /www
-
-#RUN chown -R www:www /www
