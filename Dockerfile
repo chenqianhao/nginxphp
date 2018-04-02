@@ -125,7 +125,7 @@ RUN make \
     
 WORKDIR /usr/src    
 # 安装hredis
-RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
+RUN /usr/local/php/bin/pecl install redis && wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
     && make -j && make install && ldconfig
 
 #安装php redis、swoole、mongodb扩展
@@ -172,11 +172,12 @@ RUN  source /etc/profile \
     && echo startsecs=3 >> /etc/supervisord.conf \ 
     && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
-WORKDIR /www
-
-#RUN chown -R www:www /www
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
 
 
 CMD ["/usr/bin/supervisord"]
+
+WORKDIR /www
+
+#RUN chown -R www:www /www
