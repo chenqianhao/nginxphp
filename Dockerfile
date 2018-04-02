@@ -127,7 +127,7 @@ RUN make \
     
 WORKDIR /usr/src    
 # 安装hredis
-RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
+RUN /usr/local/php/bin/pecl install redis && wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
     && make -j && make install && ldconfig
 
 #安装php redis、mongodb扩展

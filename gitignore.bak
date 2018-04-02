@@ -1,0 +1,7 @@
+/.DS_Store
+.DS_Store
+.DS_Store?
+/.idea
+www/*
+nginx/rewrite/*
+nginx/sites.d/*
