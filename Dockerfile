@@ -12,7 +12,7 @@ ENV HREDIS_VER=0.13.3
 #redis密码
 ENV REDIS_PASS=CQH123456789
 #swoole版本 https://github.com/swoole/swoole-src/releases
-ENV SWOOLE_VER=1.10.2
+ENV SWOOLE_VER=2.1.1
 #时区
 ENV TZ=Asia/Shanghai
 #运行用户
