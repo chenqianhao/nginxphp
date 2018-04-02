@@ -128,7 +128,8 @@ RUN make \
 WORKDIR /usr/src    
 # 安装hredis
 RUN /usr/local/php/bin/pecl install redis && wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
-    && make -j && make install && ldconfig
+    && make -j && make installi && touch /etc/ld.so.conf.d/libc.conf \
+    && echo '/usr/local/lib' >> /etc/ld.so.conf.d/libc.conf && ldconfig
 
 #安装php redis、mongodb扩展
 RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
