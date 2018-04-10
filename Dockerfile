@@ -7,7 +7,7 @@ ENV PHP_VER=7.2.4
 ENV NGINX_VER=1.13.8
 #redis版本
 ENV REDIS_VER=3.2.11
-phpredis_version=3.1.6
+ENV phpredis_version=3.1.6
 #hredis版本
 ENV HREDIS_VER=0.13.3
 #redis密码
