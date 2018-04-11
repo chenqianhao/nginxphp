@@ -133,21 +133,21 @@ WORKDIR /usr/src
 #安装redis扩展
 RUN wget https://github.com/phpredis/phpredis/archive/${phpredis_version}.tar.gz \
  && tar -xzvf ${phpredis_version}.tar.gz > /dev/null \
- && cd ${pwd}/phpredis-${phpredis_version} \
+ && cd /usr/src/phpredis-${phpredis_version} \
  && phpize && ./configure --with-php-config=/usr/local/php/bin/php-config \
  && make clean > /dev/null && make && make install  
  
 WORKDIR /usr/src
 #安装ds
 RUN wget https://github.com/php-ds/extension/archive/v${phpds_version}.tar.gz \
-   && tar -xzvf v${phpds_version}.tar.gz > /dev/null && cd ${pwd}/extension-${phpds_version} \
+   && tar -xzvf v${phpds_version}.tar.gz > /dev/null && cd /usr/src/extension-${phpds_version} \
   && phpize && ./configure --with-php-config=/usr/local/php/bin/php-config \
   && make clean > /dev/null && make && make install
 
 WORKDIR /usr/src
 #安装inotify扩展
 RUN wget https://github.com/arnaud-lb/php-inotify/archive/${phpinotify_version}.tar.gz \
- && tar -xzvf ${phpinotify_version}.tar.gz > /dev/null && cd ${pwd}/php-inotify-${phpinotify_version} \
+ && tar -xzvf ${phpinotify_version}.tar.gz > /dev/null && cd /usr/src/php-inotify-${phpinotify_version} \
  && phpize && ./configure --with-php-config=/usr/local/php/bin/php-config \
   && make clean > /dev/null && make && make install
 
