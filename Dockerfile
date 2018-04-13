@@ -2,17 +2,21 @@ FROM centos:latest
 MAINTAINER chenqianhao 68527761@qq.com
 
 #php版本,因为php版本间配置文件模板不相同，此处的版本号只能为大于7.0以上版本
-ENV PHP_VER=7.1.13
+ENV PHP_VER=7.2.4
 #nginx版本
 ENV NGINX_VER=1.13.8
 #redis版本
 ENV REDIS_VER=3.2.11
+ENV phpredis_version=3.1.6
 #hredis版本
 ENV HREDIS_VER=0.13.3
-#swoole版本
-ENV SWOOLE_VER=1.9.23
 #redis密码
 ENV REDIS_PASS=CQH123456789
+#swoole版本 https://github.com/swoole/swoole-src/releases
+ENV SWOOLE_VER=1.10.2
+#ds
+ENV phpds_version=1.2.4
+ENV phpinotify_version=2.0.0
 #时区
 ENV TZ=Asia/Shanghai
 #运行用户
@@ -27,7 +31,7 @@ RUN mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backu
 
 
 #安装基础工具
-RUN yum install vim wget git net-tools ansible zip unzip libmemcached sudo pcre-devel -y
+RUN yum install vim wget gcc make autoconf libxml2 libxml2-devel openssl openssl-devel curl curl-devel pcre libxslt libxslt-devel bzip2 bzip2-devel libedit libedit-devel git net-tools ansible zip unzip libmemcached sudo pcre-devel -y
 
 #时区
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && yum install ntp -y && ntpdate pool.ntp.org
@@ -125,22 +129,48 @@ RUN make \
          esac" > /etc/init.d/redis \
     && chmod +x /etc/init.d/redis
     
-WORKDIR /usr/src    
-# 安装hredis
-RUN /usr/local/php/bin/pecl install redis && wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
-    && make -j && make install && touch /etc/ld.so.conf.d/libc.conf \
-    && echo '/usr/local/lib' >> /etc/ld.so.conf.d/libc.conf && ldconfig
+WORKDIR /usr/src
+#安装redis扩展
+RUN wget https://github.com/phpredis/phpredis/archive/${phpredis_version}.tar.gz \
+ && tar -xzvf ${phpredis_version}.tar.gz > /dev/null \
+ && cd /usr/src/phpredis-${phpredis_version} \
+ && phpize && ./configure --with-php-config=/usr/local/php/bin/php-config \
+ && make clean > /dev/null && make && make install  
+ 
+WORKDIR /usr/src
+#安装ds
+RUN wget https://github.com/php-ds/extension/archive/v${phpds_version}.tar.gz \
+   && tar -xzvf v${phpds_version}.tar.gz > /dev/null && cd /usr/src/extension-${phpds_version} \
+  && phpize && ./configure --with-php-config=/usr/local/php/bin/php-config \
+  && make clean > /dev/null && make && make install
 
-#安装php redis、mongodb扩展
-RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
-    && echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
-    &&  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini
+WORKDIR /usr/src
+#安装inotify扩展
+RUN wget https://github.com/arnaud-lb/php-inotify/archive/${phpinotify_version}.tar.gz \
+ && tar -xzvf ${phpinotify_version}.tar.gz > /dev/null && cd /usr/src/php-inotify-${phpinotify_version} \
+ && phpize && ./configure --with-php-config=/usr/local/php/bin/php-config \
+  && make clean > /dev/null && make && make install
+
+#安装php redis、swoole、mongodb扩展
+#RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
+#    && /usr/local/php/bin/pecl install redis &&  echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
+RUN  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini \
+&& echo '[ds]' >> /etc/php/php.ini &&  echo "extension=ds.so" >> /etc/php/php.ini \
+&& echo '[inotify]' >> /etc/php/php.ini &&  echo "extension=inotify.so" >> /etc/php/php.ini \
+&& echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini
+
+WORKDIR /usr/src
+# 安装hredis
+RUN wget https://github.com/redis/hiredis/archive/v${HREDIS_VER}.zip && unzip v${HREDIS_VER}.zip && cd hiredis-${HREDIS_VER} \
+    && make -j && make install && touch /etc/ld.so.conf.d/libc.conf \
+    && echo '/usr/local/lib' >> /etc/ld.so.conf.d/libc.conf &&  ldconfig
 
 # 安装swoole
-RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip && unzip v${SWOOLE_VER}.zip \
-    && cd swoole-src-${SWOOLE_VER} && phpize \
-    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
-    && make clean && make -j && make install && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
+RUN wget https://github.com/swoole/swoole-src/archive/v${SWOOLE_VER}.zip \ 
+&& unzip v${SWOOLE_VER}.zip && cd swoole-src-${SWOOLE_VER} \
+&& phpize && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis  --enable-openssl \
+&& make clean && make -j && make install && echo '[swoole]' >> /etc/php/php.ini && echo "extension=swoole.so" >> /etc/php/php.ini
+
 
 #安装必要的服务
 RUN yum install vixie-cron crontabs -y \
@@ -153,9 +183,12 @@ RUN yum install vixie-cron crontabs -y \
 WORKDIR /var/tools
 RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php
 
+WORKDIR /www
+#RUN chown -R www:www /www
+
 #配置supervisor
 RUN  source /etc/profile \
-   \
+    \
     && echo [supervisord] >> /etc/supervisord.conf \
     && echo nodaemon=true >> /etc/supervisord.conf \
     \
@@ -175,10 +208,7 @@ RUN  source /etc/profile \
     && echo startsecs=3 >> /etc/supervisord.conf \ 
     && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
-WORKDIR /www
-RUN chown -R www:www /www
 
 EXPOSE 22 80 9091 8081 8083 9999 6379
-
 
 CMD ["/usr/bin/supervisord"]
