@@ -210,6 +210,6 @@ RUN  source /etc/profile \
     && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
 
-EXPOSE 22 80 9091 8081 8083 9999 6379
+EXPOSE 22 80 443 9091 8081 8083 9999 6379
 
 CMD ["/usr/bin/supervisord"]
