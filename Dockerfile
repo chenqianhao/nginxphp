@@ -13,7 +13,7 @@ ENV HREDIS_VER=0.13.3
 #redis密码
 ENV REDIS_PASS=CQH123456789
 #swoole版本 https://github.com/swoole/swoole-src/releases
-ENV SWOOLE_VER=2.1.1
+ENV SWOOLE_VER=1.10.2
 #ds
 ENV phpds_version=1.2.4
 ENV phpinotify_version=2.0.0
@@ -69,6 +69,39 @@ RUN cp php-fpm.conf.default php-fpm.conf \
     && cp /usr/local/php/bin/php /usr/sbin/ \
     && cp /usr/local/php/bin/phpize /usr/sbin/
 
+#WORKDIR /etc/nginx
+#RUN wget http://oxnd75eqj.bkt.clouddn.com/1515738108.zip \
+#    && unzip 1515738108.zip && rm -rf 1515738108.zip
+#安装nginx
+WORKDIR /usr/src
+RUN wget -O nginx.tar.gz http://nginx.org/download/nginx-${NGINX_VER}.tar.gz -O nginx.tar.gz && mkdir nginx && tar -zxvf nginx.tar.gz -C ./nginx --strip-components 1
+WORKDIR nginx
+RUN useradd $USER -s /sbin/nologin -M
+RUN ./configure --prefix=/usr/local/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --pid-path=/var/run/nginx.pid --lock-path=/var/lock/nginx.lock --user=$USER --group=$GROUP --with-http_ssl_module --with-http_flv_module --with-http_stub_status_module --with-http_gzip_static_module --http-client-body-temp-path=/tmp/nginx/client/ --http-proxy-temp-path=/tmp/nginx/proxy/ --http-fastcgi-temp-path=/tmp/nginx/fcgi/ --with-pcre --with-http_dav_module \
+     && make && make install \
+     && mkdir -p -m 777 /tmp/nginx \
+     && echo "#!/bin/sh" > /etc/init.d/nginx \
+     && echo "#description: Nginx web server." >> /etc/init.d/nginx \
+     && echo -e "case \$1 in \n\
+            restart): \n\
+                /usr/local/nginx/sbin/nginx -s reload \n\
+                ;; \n\
+            stop): \n\
+                /usr/local/nginx/sbin/nginx -s stop \n\
+                ;; \n\
+            *): \n\
+                /usr/local/nginx/sbin/nginx \n\
+                ;; \n\
+        esac \n" >> /etc/init.d/nginx \
+     && chmod +x /etc/init.d/nginx
+RUN \
+  cd /etc/nginx/ && mv nginx.conf nginx.conf.baks \
+     && wget http://oxnd75eqj.bkt.clouddn.com/1515828324.conf \
+     && mv 1515828324.conf nginx.conf && mkdir sites.d \
+     && cd sites.d &&  wget http://oxnd75eqj.bkt.clouddn.com/1515839080.zip \
+     && unzip 1515839080.zip && rm -rf 1515839080.zip \
+     && cd /etc/nginx/ && mkdir rewrite && cd rewrite && touch test.conf
+
 #安装redis server
 WORKDIR /usr/src
 RUN wget -O redis.tar.gz http://download.redis.io/releases/redis-${REDIS_VER}.tar.gz && mkdir redis && tar -xzvf redis.tar.gz -C ./redis --strip-components 1
@@ -119,6 +152,8 @@ RUN wget https://github.com/arnaud-lb/php-inotify/archive/${phpinotify_version}.
   && make clean > /dev/null && make && make install
 
 #安装php redis、swoole、mongodb扩展
+#RUN /usr/local/php/bin/pecl install inotify && echo '[inotify]' >> /etc/php/php.ini && echo "extension=inotify.so" >> /etc/php/php.ini \
+#    && /usr/local/php/bin/pecl install redis &&  echo '[redis]' >> /etc/php/php.ini && echo "extension=redis.so" >> /etc/php/php.ini \
 RUN  /usr/local/php/bin/pecl install mongodb && echo '[mongodb]' >> /etc/php/php.ini &&  echo "extension=mongodb.so" >> /etc/php/php.ini \
 && echo '[ds]' >> /etc/php/php.ini &&  echo "extension=ds.so" >> /etc/php/php.ini \
 && echo '[inotify]' >> /etc/php/php.ini &&  echo "extension=inotify.so" >> /etc/php/php.ini \
@@ -144,8 +179,11 @@ RUN yum install vixie-cron crontabs -y \
      && rm -rf composer-setup.php && cp /usr/local/bin/composer /usr/sbin/ \
      && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
+
+WORKDIR /var/tools
+RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php
+
 WORKDIR /www
-RUN rm -rf /usr/src/*
 #RUN chown -R www:www /www
 
 #配置supervisor
@@ -156,6 +194,9 @@ RUN  source /etc/profile \
     \
     && echo [program:sshd] >> /etc/supervisord.conf \
     && echo command=/usr/sbin/sshd -D >> /etc/supervisord.conf \
+    \
+    && echo [program:nginx] >> /etc/supervisord.conf \
+    && echo command=/etc/init.d/nginx start >> /etc/supervisord.conf \
     \
     && echo [program:php-fpm] >> /etc/supervisord.conf \
     && echo command=/etc/init.d/php-fpm start >> /etc/supervisord.conf \
@@ -168,6 +209,6 @@ RUN  source /etc/profile \
     && echo command=/usr/sbin/crond -n -x bit >> /etc/supervisord.conf
 
 
-EXPOSE 22 9091 8081 8083 9999 6379
+EXPOSE 22 80 9091 8081 8083 9999 6379
 
 CMD ["/usr/bin/supervisord"]
