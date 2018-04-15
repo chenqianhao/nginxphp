@@ -3,8 +3,6 @@ MAINTAINER chenqianhao 68527761@qq.com
 
 #php版本,因为php版本间配置文件模板不相同，此处的版本号只能为大于7.0以上版本
 ENV PHP_VER=7.2.4
-#nginx版本
-ENV NGINX_VER=1.13.8
 #redis版本
 ENV REDIS_VER=3.2.11
 ENV phpredis_version=3.1.6

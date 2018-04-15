@@ -33,7 +33,7 @@ docker run -h sd3 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 --name sd3
 ```
 > 新增网站都放入nginx/sites.d文件下，以.conf文件结尾，rewrite文件放入nginx/rewrite目录下
 
-4. 进入容器安装SwooleDistributed矿建
+4. 进入容器安装SwooleDistributed创建
 * 进入容器
 ```
 sudo docker exec -it nginxphp /bin/bash
