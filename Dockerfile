@@ -184,6 +184,7 @@ WORKDIR /var/tools
 RUN mkdir test && cd test && echo "<?php phpinfo(); ?>" > /var/tools/test/index.php
 
 WORKDIR /www
+RUN rm -rf /usr/src/*
 #RUN chown -R www:www /www
 
 #配置supervisor

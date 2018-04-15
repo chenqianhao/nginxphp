@@ -52,7 +52,7 @@ mkdir -p /www/sd && cd /www/sd
 vim composer.json
 {
   "require": {
-    "tmtbe/swooledistributed":"3.1.8"
+    "tmtbe/swooledistributed":">=3.1.8"
   },
  "autoload": {
     "psr-4": {
