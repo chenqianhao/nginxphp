@@ -1,12 +1,10 @@
-# nginxphp
 
-
-NGING+PHP+REDIS Dockerfile
+PHP+REDIS Dockerfile
 =================
 
 基于最新版CentOS官方镜像
 
-包含php，nginx，reids，oepnssh server，crond等服务。修改顶部的PHP_VER, NGINX_VER, REDIS_VER可构建任意版本的php，nginx，redis版本镜像。
+包含php，reids，oepnssh server，crond等服务。修改顶部的PHP_VER, REDIS_VER可构建任意版本的php，nginx，redis版本镜像。
 
 1. 安装docker(加速器自行配置)
 
@@ -17,32 +15,25 @@ wget -qO- https://get.docker.com/ | sh
 2. 获取容器
 
 ```
-sudo docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
-```
-3. 获取配置文件
-
-```
-git clone git@github.com:chenqianhao/nginxphp.git
-
-# 新建etc/nginx/sites.d文件夹，新增配置文件
+sudo docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd3
 ```
 
-4. 运行容器
+3. 运行容器
 
 - linux|mac
 ```
 # 进入上面的配置文件夹（注意端口不要被占用，占用后自行调整）
-sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd --restart=always -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
+sudo docker run -h sd3 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 --name sd3 -itd --restart=always -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd3
 
 ```
 -  windows  
 ```
 #mkdir  E:/docker/www  #新建网站目录
-docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd -v E:/docker/nginxphp/sites.d:/etc/nginx/sites.d E:/docker/nginxphp/rewrite:/etc/nginx/rewrite -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp
+docker run -h sd3 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 --name sd3 -itd -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd3
 ```
 > 新增网站都放入nginx/sites.d文件下，以.conf文件结尾，rewrite文件放入nginx/rewrite目录下
 
-5. 进入容器安装SwooleDistributed矿建
+4. 进入容器安装SwooleDistributed矿建
 * 进入容器
 ```
 sudo docker exec -it nginxphp /bin/bash
