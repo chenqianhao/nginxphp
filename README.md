@@ -32,4 +32,4 @@ sudo docker run -h sd2 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 63
 mkdir  E:/docker/www  #新建网站目录
 docker run -h sd2 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name sd2 -itd  -v E:/docker/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:sd2
 ```
-4. 安装sd框架（参考官方composer看装方法）
+4. 安装sd框架（参考官方composer安装方法）
