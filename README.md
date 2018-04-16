@@ -32,7 +32,7 @@ git clone git@github.com:chenqianhao/nginxphp.git
 - linux|mac
 ```
 # 进入上面的配置文件夹（注意端口不要被占用，占用后自行调整）
-sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd --restart=always -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:nginx+sd2
+sudo docker run -h nginxphp -p 80:80 -p 443:443 -p 8091:8091 -p 8081:8081 -p 8083:8083 -p 9999:9999 -p 6379:6379 --name nginxphp -itd --restart=always -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf -v $PWD/nginx/sites.d:/etc/nginx/sites.d  -v $PWD/nginx/rewrite:/etc/nginx/rewrite  -v $PWD/www:/www registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:nginxsd2
 
 ```
 -  windows  
