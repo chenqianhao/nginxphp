@@ -17,7 +17,7 @@ wget -qO- https://get.docker.com/ | sh
 2. 获取容器
 
 ```
-sudo docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:nginx+sd2
+sudo docker pull registry.cn-shenzhen.aliyuncs.com/chenqianhao/nginxphp:nginxsd2
 ```
 3. 获取配置文件
 
