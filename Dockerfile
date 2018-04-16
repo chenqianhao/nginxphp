@@ -13,7 +13,7 @@ ENV HREDIS_VER=0.13.3
 #redis密码
 ENV REDIS_PASS=CQH123456789
 #swoole版本 https://github.com/swoole/swoole-src/releases
-ENV SWOOLE_VER=2.1.1
+ENV SWOOLE_VER=1.10.2
 #ds
 ENV phpds_version=1.2.4
 ENV phpinotify_version=2.0.0
